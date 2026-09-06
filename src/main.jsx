@@ -117,9 +117,9 @@ function App(){
   useEffect(()=>{
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register(
-        '/Trip-Mate-Maple/sw.js',
+        '/Trip-Maple-/sw.js',
         {
-          scope:'/Trip-Mate-Maple/'
+          scope:'/Trip-Maple-/'
         }
       ).catch(()=>{});
     }
@@ -331,7 +331,8 @@ function App(){
             }))
           }
           onEditDay={()=>setEditingDay(selected)}
-          onAdd={()=>{            setEditing({
+          onAdd={()=>{
+            setEditing({
               day:selected,
               date:selected.date,
               index:null
@@ -435,12 +436,36 @@ function App(){
           day={editingDay}
           onClose={()=>setEditingDay(null)}
           onSave={updateDay}
-          onAddActivity={()=>{setEditing({day:editingDay,date:editingDay.date,index:null});setShowForm(true)}}
-          onEditActivity={i=>{setEditing({day:editingDay,date:editingDay.date,index:i});setShowForm(true)}}
+          onAddActivity={()=>{
+            setEditing({
+              day:editingDay,
+              date:editingDay.date,
+              index:null
+            });
+            setShowForm(true);
+          }}
+          onEditActivity={i=>{
+            setEditing({
+              day:editingDay,
+              date:editingDay.date,
+              index:i
+            });
+            setShowForm(true);
+          }}
           onDeleteActivity={i=>{
             deleteActivity(editingDay.date,i);
-            setEditingDay(prev=>prev ? {...prev,activities:prev.activities.filter((_,idx)=>idx!==i)} : prev);
-            setSelected(prev=>prev ? {...prev,activities:prev.activities.filter((_,idx)=>idx!==i)} : prev);
+            setEditingDay(prev=>prev ? {
+              ...prev,
+              activities:prev.activities.filter(
+                (_,idx)=>idx!==i
+              )
+            } : prev);
+            setSelected(prev=>prev ? {
+              ...prev,
+              activities:prev.activities.filter(
+                (_,idx)=>idx!==i
+              )
+            } : prev);
           }}
         />
       )}
@@ -460,20 +485,94 @@ function App(){
           onSave={(a)=>{
 
             if(editing.index !== null){
-              updateActivity(editing.date,editing.index,a);
-              setEditingDay(prev=>prev && prev.date===editing.date ? {...prev,activities:prev.activities.map((item,i)=>i===editing.index?a:item)} : prev);
-              setSelected(prev=>prev && prev.date===editing.date ? {...prev,activities:prev.activities.map((item,i)=>i===editing.index?a:item)} : prev);
+              updateActivity(
+                editing.date,
+                editing.index,
+                a
+              );
+
+              setEditingDay(prev=>
+                prev &&
+                prev.date===editing.date
+                  ? {
+                      ...prev,
+                      activities:
+                        prev.activities.map(
+                          (item,i)=>
+                            i===editing.index
+                              ? a
+                              : item
+                        )
+                    }
+                  : prev
+              );
+
+              setSelected(prev=>
+                prev &&
+                prev.date===editing.date
+                  ? {
+                      ...prev,
+                      activities:
+                        prev.activities.map(
+                          (item,i)=>
+                            i===editing.index
+                              ? a
+                              : item
+                        )
+                    }
+                  : prev
+              );
+
             }else{
-              addActivity(editing.day.date,a);
-              setEditingDay(prev=>prev && prev.date===editing.day.date ? {...prev,activities:[...prev.activities,a].sort((x,y)=>String(x.time).localeCompare(String(y.time)))} : prev);
-              setSelected(prev=>prev && prev.date===editing.day.date ? {...prev,activities:[...prev.activities,a].sort((x,y)=>String(x.time).localeCompare(String(y.time)))} : prev);
+
+              addActivity(
+                editing.day.date,
+                a
+              );
+
+              setEditingDay(prev=>
+                prev &&
+                prev.date===editing.day.date
+                  ? {
+                      ...prev,
+                      activities:[
+                        ...prev.activities,
+                        a
+                      ].sort(
+                        (x,y)=>
+                          String(x.time)
+                            .localeCompare(
+                              String(y.time)
+                            )
+                      )
+                    }
+                  : prev
+              );
+
+              setSelected(prev=>
+                prev &&
+                prev.date===editing.day.date
+                  ? {
+                      ...prev,
+                      activities:[
+                        ...prev.activities,
+                        a
+                      ].sort(
+                        (x,y)=>
+                          String(x.time)
+                            .localeCompare(
+                              String(y.time)
+                            )
+                      )
+                    }
+                  : prev
+              );
             }
 
             setShowForm(false);
           }}
         />
       )}
-
 
     </div>
   );
@@ -677,6 +776,7 @@ function Schedule({
               <b>
                 {d.date.slice(0,2)}
               </b>
+
               <small>
                 {d.date.slice(3,5)}
               </small>
@@ -836,6 +936,7 @@ function DayDetail({
           <Pencil size={18}/>
           Editar dia
         </button>
+
         <button className="primary" onClick={onAdd}>
           <Plus size={18}/>
           Adicionar atividade
@@ -851,6 +952,7 @@ function DayDetail({
           onClick={onDone}
         >
           <Check size={18}/>
+
           {done
             ? 'Dia concluído'
             : 'Marcar como concluído'}
@@ -939,26 +1041,198 @@ function MapScreen({days}){
   );
 }
 
-function DayEditModal({day,onClose,onSave,onEditActivity,onAddActivity,onDeleteActivity}){
-  const [form,setForm]=useState({date:day.date,title:day.title,city:day.city,notes:day.notes||''});
+function DayEditModal({
+  day,
+  onClose,
+  onSave,
+  onEditActivity,
+  onAddActivity,
+  onDeleteActivity
+}){
+  const [form,setForm]=useState({
+    date:day.date,
+    title:day.title,
+    city:day.city,
+    notes:day.notes||''
+  });
+
   function submit(){
     if(!form.title.trim()) return;
+
     const nextDate=form.date.trim()||day.date;
-    onSave({...day,date:nextDate,dow:weekdayFromDate(nextDate)||day.dow,title:form.title.trim(),city:form.city.trim()||'A definir',notes:form.notes.trim()});
+
+    onSave({
+      ...day,
+      date:nextDate,
+      dow:weekdayFromDate(nextDate)||day.dow,
+      title:form.title.trim(),
+      city:form.city.trim()||'A definir',
+      notes:form.notes.trim()
+    });
   }
-  return <div className="modal"><div className="sheet">
-    <div className="sheetHead"><h2>Editar dia</h2><button className="iconBtn" onClick={onClose}><X/></button></div>
-    <label>Data<input value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></label>
-    <label>Dia da semana<input value={weekdayFromDate(form.date)||day.dow} disabled/></label>
-    <label>Título do dia<input autoFocus value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></label>
-    <label>Cidade / região<input value={form.city} onChange={e=>setForm({...form,city:e.target.value})}/></label>
-    <label>Observações<textarea rows="3" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/></label>
-    <div className="editActivities">
-      <div className="editActivitiesHead"><strong>Atividades do dia</strong><button className="smallAdd" onClick={onAddActivity} type="button"><Plus size={14}/> Adicionar</button></div>
-      {day.activities.map((a,i)=><div className="editActivityRow" key={i}><time>{a.time}</time><div><strong>{a.title}</strong><span>{a.place}</span></div><div className="rowActions"><button type="button" onClick={()=>onEditActivity(i)}><Pencil size={14}/></button><button type="button" onClick={()=>onDeleteActivity(i)}><Trash2 size={14}/></button></div></div>)}
+
+  return (
+    <div className="modal">
+
+      <div className="sheet">
+
+        <div className="sheetHead">
+
+          <h2>
+            Editar dia
+          </h2>
+
+          <button
+            className="iconBtn"
+            onClick={onClose}
+          >
+            <X/>
+          </button>
+
+        </div>
+
+        <label>
+          Data
+          <input
+            value={form.date}
+            onChange={e=>
+              setForm({
+                ...form,
+                date:e.target.value
+              })
+            }
+          />
+        </label>
+
+        <label>
+          Dia da semana
+          <input
+            value={weekdayFromDate(form.date)||day.dow}
+            disabled
+          />
+        </label>
+
+        <label>
+          Título do dia
+          <input
+            autoFocus
+            value={form.title}
+            onChange={e=>
+              setForm({
+                ...form,
+                title:e.target.value
+              })
+            }
+          />
+        </label>
+
+        <label>
+          Cidade / região
+          <input
+            value={form.city}
+            onChange={e=>
+              setForm({
+                ...form,
+                city:e.target.value
+              })
+            }
+          />
+        </label>
+
+        <label>
+          Observações
+          <textarea
+            rows="3"
+            value={form.notes}
+            onChange={e=>
+              setForm({
+                ...form,
+                notes:e.target.value
+              })
+            }
+          />
+        </label>
+
+        <div className="editActivities">
+
+          <div className="editActivitiesHead">
+
+            <strong>
+              Atividades do dia
+            </strong>
+
+            <button
+              className="smallAdd"
+              onClick={onAddActivity}
+              type="button"
+            >
+              <Plus size={14}/>
+              Adicionar
+            </button>
+
+          </div>
+
+          {day.activities.map((a,i)=>
+
+            <div
+              className="editActivityRow"
+              key={i}
+            >
+
+              <time>
+                {a.time}
+              </time>
+
+              <div>
+                <strong>
+                  {a.title}
+                </strong>
+
+                <span>
+                  {a.place}
+                </span>
+              </div>
+
+              <div className="rowActions">
+
+                <button
+                  type="button"
+                  onClick={()=>
+                    onEditActivity(i)
+                  }
+                >
+                  <Pencil size={14}/>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={()=>
+                    onDeleteActivity(i)
+                  }
+                >
+                  <Trash2 size={14}/>
+                </button>
+
+              </div>
+
+            </div>
+
+          )}
+
+        </div>
+
+        <button
+          className="primary full"
+          disabled={!form.title.trim()}
+          onClick={submit}
+        >
+          Salvar alterações
+        </button>
+
+      </div>
+
     </div>
-    <button className="primary full" disabled={!form.title.trim()} onClick={submit}>Salvar alterações</button>
-  </div></div>;
+  );
 }
 
 function ActivityForm({
@@ -1122,6 +1396,7 @@ function MoreScreen({
       </div>
 
       <div className="moreHero">
+
         <div>
 
           <strong>
